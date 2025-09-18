@@ -1,0 +1,10 @@
+uvicorn[standard]
+fastapi
+pydantic
+pydantic_settings
+python-multipart
+python-dotenv
+jinja2
+async-lru
+kubernetes
+httpx
