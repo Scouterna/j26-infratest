@@ -28,7 +28,7 @@ async def get_info():
     Get app info
     """
     info = {}
-    info["Running in kubernetes"] = str(running_in_kubernetes)
+    info["Running in Kubernetes"] = str(running_in_kubernetes)
     if running_in_kubernetes:
         try:
             with open("/var/run/secrets/kubernetes.io/serviceaccount/namespace") as f:
