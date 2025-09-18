@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
         - name: j26-infratest
-          image: ghcr.io/scouterna/j26-infratest:main
+          image: ghcr.io/scouterna/j26-infratest:latest
           imagePullPolicy: Always
           ports:
             - name: http
