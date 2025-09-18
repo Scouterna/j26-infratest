@@ -1,8 +1,10 @@
+import datetime
 import logging
 import os
 
 import kubernetes
 from fastapi import APIRouter, status
+from kubernetes.client.models import V1Pod
 
 from .config import get_settings
 
@@ -45,13 +47,21 @@ async def get_info():
             v1 = kubernetes.client.CoreV1Api()
             try:
                 pod = v1.read_namespaced_pod(name=pod_name, namespace=namespace)
-                # Get image name from the first container
-                if pod.spec.containers:
+                # Ensure pod is a V1Pod instance and has spec and containers
+                if (
+                    isinstance(pod, V1Pod)
+                    and pod.spec is not None
+                    and getattr(pod.spec, "containers", None) is not None
+                    and isinstance(pod.spec.containers, list)
+                    and len(pod.spec.containers) > 0
+                ):
                     image_name = pod.spec.containers[0].image
                     info["Pod image"] = image_name
                 else:
-                    logging.error("No pod.spec.containers found")
+                    logging.error("Pod object is not a V1Pod instance or missing spec/containers")
             except Exception as e:
                 logging.error("Can't retrieve pod image name. Error %s", str(e))
+
+    info["Now"] = datetime.datetime.now().astimezone().isoformat()
 
     return info
