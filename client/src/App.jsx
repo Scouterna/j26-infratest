@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
+const buildApiPath = (endpoint) => {
+	if (typeof window === "undefined") return endpoint;
+
+	const [firstSegment] = window.location.pathname.split("/").filter(Boolean);
+	const basePath = firstSegment ? `/${firstSegment}` : "";
+	const normalisedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+	return `${basePath}${normalisedEndpoint}`;
+};
+
 function App() {
 	const [info, setInfo] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
-		fetch("/api/info")
+		fetch(buildApiPath("/api/info"))
 			.then((res) => {
 				if (!res.ok) throw new Error("Network response was not ok");
 				return res.json();
