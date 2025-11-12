@@ -2,6 +2,15 @@
 <html lang="en">
 
 <head>
+  <script>
+    (() => {
+      const { pathname, search, hash } = window.location;
+      if (pathname !== "/" && !pathname.endsWith("/")) {
+        const normalized = `${pathname}/`;
+        window.history.replaceState(null, "", `${normalized}${search}${hash}`);
+      }
+    })();
+  </script>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/icon" href="./scouterna.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
