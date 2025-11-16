@@ -20,6 +20,15 @@ function App() {
 	const [cookiesLoading, setCookiesLoading] = useState(true);
 	const [cookiesError, setCookiesError] = useState(null);
 
+	// Helper: decode percent-encoded cookie values safely
+	const safeDecode = (val) => {
+		try {
+			return decodeURIComponent(String(val));
+		} catch {
+			return String(val);
+		}
+	};
+
 	useEffect(() => {
 		fetch(buildApiPath("/api/info"))
 			.then((res) => {
@@ -38,7 +47,8 @@ function App() {
 
 	// Fetch cookies separately
 	useEffect(() => {
-		fetch(buildApiPath("/api/cookies"))
+		// include cookies on the request so the server receives them
+		fetch(buildApiPath("/api/cookies"), { credentials: "include" })
 			.then((res) => {
 				if (!res.ok) throw new Error("Network response was not ok");
 				return res.json();
@@ -81,7 +91,14 @@ function App() {
 								>
 									{key}
 								</td>
-								<td style={{ border: "1px solid #ccc", padding: "8px" }}>
+								<td
+									style={{
+										border: "1px solid #ccc",
+										padding: "8px",
+										textAlign: "left",
+										wordBreak: "break-all",
+									}}
+								>
 									{String(value)}
 								</td>
 							</tr>
@@ -117,8 +134,15 @@ function App() {
 								>
 									{name}
 								</td>
-								<td style={{ border: "1px solid #ccc", padding: "8px" }}>
-									{String(value)}
+								<td
+									style={{
+										border: "1px solid #ccc",
+										padding: "8px",
+										textAlign: "left",
+										wordBreak: "break-all",
+									}}
+								>
+									{safeDecode(value)}
 								</td>
 							</tr>
 						))}
