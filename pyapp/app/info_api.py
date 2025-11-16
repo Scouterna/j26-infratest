@@ -3,7 +3,7 @@ import logging
 import os
 
 import kubernetes
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
 from kubernetes.client.models import V1Pod
 
 from .config import get_settings
@@ -65,3 +65,16 @@ async def get_info():
     info["Now"] = datetime.datetime.now().astimezone().isoformat()
 
     return info
+
+
+@router.get(
+    "/cookies",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    response_description="Returns all cookies available for the request",
+)
+async def get_cookies(request: Request):
+    """
+    Return all cookies sent with the request as a dict.
+    """
+    return dict(request.cookies)
