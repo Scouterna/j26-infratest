@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG if DEBUG_MODE else logging.INFO, format=
 
 # Set higher logging levels for noisy modules to avoid excessive output.
 logging.getLogger("uvicorn").setLevel(logging.WARNING)
-# logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.INFO)
 # logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
 
 logging.info("Starting Infratest app")
