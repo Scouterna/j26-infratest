@@ -57,18 +57,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # - name: Install kubectl
-      #   if: github.event_name != 'pull_request'
-      #   uses: azure/setup-kubectl@v3
+      - name: Install kubectl
+        if: github.event_name != 'pull_request'
+        uses: azure/setup-kubectl@v3
 
-      # - name: Update Context
-      #   if: github.event_name != 'pull_request'
-      #   uses: azure/k8s-set-context@v1
-      #   with:
-      #     method: kubeconfig
-      #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      - name: Update Context
+        if: github.event_name != 'pull_request'
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
-      # - name: Restart deployment
-      #   if: github.event_name != 'pull_request'
-      #   run: |
-      #     kubectl rollout restart deployment/j26-infratest -n j26-infratest
+      - name: Restart deployment
+        if: github.event_name != 'pull_request'
+        run: |
+          kubectl rollout restart deployment/j26-infratest -n j26-infratest
