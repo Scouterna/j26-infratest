@@ -1,5 +1,8 @@
 uvicorn[standard]
-fastapi
+httpx[http2]
+fastapi[standard]
+authlib
+itsdangerous
 pydantic
 pydantic_settings
 python-multipart
@@ -7,4 +10,4 @@ python-dotenv
 jinja2
 async-lru
 kubernetes
-httpx
+prometheus-fastapi-instrumentator

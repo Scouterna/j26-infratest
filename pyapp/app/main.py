@@ -5,23 +5,33 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .config import get_settings
 from .info_api import router as info_router
 
 
-# Lifespan event handler
+# Create an instrumentor object
+instrumentator = Instrumentator()
+
+
+# Define the lifespan event handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Manages application startup and shutdown events.
     """
 
+    instrumentator.expose(app)  # Registers /metrics endpoint when app starts
     yield  # Run FastAPI
 
 
 # Initialize FastAPI app with the lifespan manager
 app = FastAPI(lifespan=lifespan)
+settings = get_settings()
+app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
+instrumentator.instrument(app)  # Adds Prometheus middleware during initialization
 
 
 # Include the API routers
