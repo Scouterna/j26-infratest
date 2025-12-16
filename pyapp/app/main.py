@@ -23,7 +23,6 @@ async def lifespan(app: FastAPI):
     Manages application startup and shutdown events.
     """
 
-    instrumentator.expose(app)  # Registers /metrics endpoint when app starts
     yield  # Run FastAPI
 
 
@@ -32,6 +31,7 @@ app = FastAPI(lifespan=lifespan)
 settings = get_settings()
 app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
 instrumentator.instrument(app)  # Adds Prometheus middleware during initialization
+instrumentator.expose(app)  # Registers /metrics endpoint before other catch-all routes
 
 
 # Include the API routers
