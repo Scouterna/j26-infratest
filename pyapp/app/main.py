@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -40,12 +40,12 @@ app.include_router(info_router, prefix="/api", tags=["Info API"])
 
 # --- Static Files Configuration in production ---
 # In a production Docker build, the 'client/dist' files will be copied to 'pyapp/static'
-STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static"))
-if os.path.exists(STATIC_DIR):  # Yes! We are running in a container
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+if STATIC_DIR.exists():  # Yes! We are running in a container
     # Mount the static directory for /assets
-    app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="assets")
+    app.mount("/assets", StaticFiles(directory=str(STATIC_DIR / "assets")), name="assets")
 
-    templates = Jinja2Templates(directory=STATIC_DIR)  # For templating index.html
+    templates = Jinja2Templates(directory=str(STATIC_DIR))  # For templating index.html
 
     @app.get("/{full_path:path}", tags=["Client"])
     async def serve_react_app(request: Request, full_path: str):
@@ -54,17 +54,16 @@ if os.path.exists(STATIC_DIR):  # Yes! We are running in a container
         """
         if not full_path:
             full_path = "index.html"
-        file_path = os.path.join(STATIC_DIR, full_path)
-        if not os.path.exists(file_path):
+        file_path = STATIC_DIR / full_path
+        if not file_path.exists():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
 
         if full_path == "index.html":
-            settings = get_settings()
             return templates.TemplateResponse(
                 request=request, name="index.html", context=dict(settings)
             )  # Add environment variables
         else:
-            return FileResponse(file_path)
+            return FileResponse(str(file_path))
 
 
 # Add a root endpoint for basic API health check
