@@ -2,6 +2,7 @@ uvicorn[standard]
 httpx[http2]
 fastapi[standard]
 authlib
+joserfc
 itsdangerous
 pydantic
 pydantic_settings
