@@ -3,9 +3,10 @@ import logging
 import os
 
 import kubernetes
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from kubernetes.client.models import V1Pod
 
+from .auth_dep import AuthenticatedUser, require_authenticated_user
 from .config import get_settings
 
 settings = get_settings()
@@ -78,3 +79,16 @@ async def get_cookies(request: Request):
     Return all cookies sent with the request as a dict.
     """
     return dict(request.cookies)
+
+
+@router.get(
+    "/user",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    response_description="Returns the user object",
+)
+async def get_user(user: AuthenticatedUser = Depends(require_authenticated_user)):
+    """
+    Returns an autenticated user object as a dict.
+    """
+    return dict(user)
