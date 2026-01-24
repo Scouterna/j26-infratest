@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 from urllib.parse import urljoin
 
 import httpx
@@ -10,19 +10,20 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
-_jwks_keyset_cache: Dict[str, KeySet] = {}
+_jwks_keyset_cache: dict[str, KeySet] = {}
 
 
 class AuthenticatedUser(BaseModel):
     subject: str
-    name: str | None = None
-    preferred_username: str | None = None
+    name: str
+    preferred_username: str
     email: str | None = None
     roles: list[str] = Field(default_factory=list)
     # claims: Dict[str, Any]
 
     def __str__(self) -> str:
-        return self.preferred_username or self.subject
+        uid = self.preferred_username or self.subject
+        return f"{self.name} ({uid})"
 
 
 async def get_jwks_keyset(request: Request) -> KeySet | None:
@@ -34,8 +35,8 @@ async def get_jwks_keyset(request: Request) -> KeySet | None:
     if cache_key in _jwks_keyset_cache:
         return _jwks_keyset_cache[cache_key]
 
-    # url = urljoin(str(request.base_url), "auth/keys")
-    url = "https://dev.id.scouterna.se/realms/jamboree26/protocol/openid-connect/certs"
+    url = urljoin(str(request.base_url), "auth/certs")
+    # url = "https://dev.id.scouterna.se/realms/jamboree26/protocol/openid-connect/certs"
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
             response = await http_client.get(url)
@@ -54,7 +55,7 @@ async def get_jwks_keyset(request: Request) -> KeySet | None:
         return None
 
 
-async def decode_access_token(token: str, request: Request) -> Dict[str, Any]:
+async def decode_access_token(token: str, request: Request) -> dict[str, Any]:
     keyset = await get_jwks_keyset(request)
     if keyset is None:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Token validation unavailable")
@@ -69,7 +70,7 @@ async def decode_access_token(token: str, request: Request) -> Dict[str, Any]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized") from exc
 
 
-def _extract_roles(claims: Dict[str, Any]) -> list[str]:
+def _extract_roles(claims: dict[str, Any]) -> list[str]:
     roles = set()
     realm_access = claims.get("realm_access") or {}
     realm_roles = realm_access.get("roles") or []
