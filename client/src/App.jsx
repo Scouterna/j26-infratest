@@ -78,7 +78,7 @@ function App() {
 
 				// If unauthorized, try to refresh the token
 				if (userRes.status === 401) {
-					const refreshRes = await fetch(buildApiPath("/auth/refresh"), {
+					const refreshRes = await fetch("/auth/refresh", {
 						credentials: "include",
 					});
 
@@ -213,9 +213,7 @@ function App() {
 					type="button"
 					onClick={() => {
 						const currentPage = encodeURIComponent(window.location.href);
-						window.location.href = buildApiPath(
-							`/auth/login?redirect_uri=${currentPage}`
-						);
+						window.location.href = `/auth/login?redirect_uri=${currentPage}`;
 					}}
 					style={{
 						padding: "10px 20px",

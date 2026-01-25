@@ -1,16 +1,15 @@
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from starlette.middleware.sessions import SessionMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.middleware.sessions import SessionMiddleware
 
 from .config import get_settings
 from .info_api import router as info_router
-
 
 # Create an instrumentor object
 instrumentator = Instrumentator()
@@ -64,6 +63,11 @@ if STATIC_DIR.exists():  # Yes! We are running in a container
             )  # Add environment variables
         else:
             return FileResponse(str(file_path))
+
+else:  # We are running in dev
+    from .auth_api import auth_router
+
+    app.include_router(auth_router, include_in_schema=False)  # We need the '/auth' API
 
 
 # Add a root endpoint for basic API health check
