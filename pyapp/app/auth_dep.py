@@ -35,8 +35,17 @@ async def get_jwks_keyset(request: Request) -> KeySet | None:
     if cache_key in _jwks_keyset_cache:
         return _jwks_keyset_cache[cache_key]
 
-    url = urljoin(str(request.base_url), "auth/certs")
-    # url = "https://dev.id.scouterna.se/realms/jamboree26/protocol/openid-connect/certs"
+    url = urljoin(str(request.base_url), "auth/.well-known/openid-configuration")
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as http_client:
+            response = await http_client.get(url)
+            response.raise_for_status()
+            oid_config = response.json()
+    except Exception as exc:
+        logger.warning("Failed to fetch %s: %s", url, exc)
+        return None
+
+    url = oid_config["jwks_uri"]
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
             response = await http_client.get(url)
