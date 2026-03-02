@@ -81,14 +81,17 @@ async def decode_access_token(token: str, request: Request) -> dict[str, Any]:
 
 def _extract_roles(claims: dict[str, Any]) -> list[str]:
     roles = set()
+
+    # Extract j26-* roles from realm_access
     realm_access = claims.get("realm_access") or {}
     realm_roles = realm_access.get("roles") or []
-    roles.update(role for role in realm_roles if isinstance(role, str))
+    roles.update(role for role in realm_roles if isinstance(role, str) and role.startswith("j26-"))
 
+    # Extract resource_access roles prefixed with resource name, e.g. "j26-signupinfo:stats:read"
     resource_access = claims.get("resource_access") or {}
-    for resource in resource_access.values():
+    for resource_name, resource in resource_access.items():
         resource_roles = resource.get("roles") if isinstance(resource, dict) else []
-        roles.update(role for role in (resource_roles or []) if isinstance(role, str))
+        roles.update(f"{resource_name}:{role}" for role in (resource_roles or []) if isinstance(role, str))
 
     return sorted(roles)
 
